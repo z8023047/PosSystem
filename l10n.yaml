@@ -1,0 +1,12 @@
+# https://docs.flutter.dev/development/accessibility-and-localization/internationalization#configuring-the-l10nyaml-file
+arb-dir: lib/l10n
+template-arb-file: app_zh.arb
+output-localization-file: app_localizations.dart
+preferred-supported-locales:
+  - "zh_Hant_TW"
+  - "zh_Hant"
+  - "zh_TW"
+  - "zh"
+  - "en"
+use-deferred-loading: true
+untranslated-messages-file: docs/untranslated.json

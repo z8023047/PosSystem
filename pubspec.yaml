@@ -1,0 +1,120 @@
+name: possystem
+description: POS system by Flutter
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+homepage: https://github.com/evan361425/flutter-pos-system
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# 2.7.0
+version: 2.7.0+20700001
+
+environment:
+  flutter: "3.7.12"
+  sdk: ">=2.16.0 <3.0.0"
+#2.19.6
+dependencies:
+  custom_radio_grouped_button: any
+  group_button: ^3.2.0
+  flut_grouped_buttons: ^0.0.7
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # core helper
+  provider: ^6.0.5
+  intl: ^0.18.1
+  #^0.17.0
+  firebase_core: ^2.9.0
+  firebase_analytics: ^10.2.0
+  firebase_auth: ^4.4.1
+  firebase_crashlytics: ^3.1.0
+  # Api connection
+  dio: ^4.0.4
+  connectivity_plus: ^2.2.0
+  # Json Operations
+  json_annotation: ^4.4.0
+  json_serializable: ^6.1.4
+  build_runner: ^2.1.7
+  # services
+  sqflite: ^2.2.6
+  sembast: ^3.4.3+1
+  shared_preferences: ^2.1.0
+  http: ^0.13.5
+
+  # google services 
+  googleapis: ^10.1.0
+  google_sign_in: ^6.1.0
+  extension_google_sign_in_as_googleapis_auth: ^2.0.9
+
+  # components
+  flutter_slidable: ^3.0.0
+  sliding_up_panel: ^2.0.0+1
+  table_calendar: ^3.0.8
+  pull_to_refresh: ^2.0.0
+
+  # image
+  image: ^4.0.15
+  image_picker: ^0.8.7+3
+  image_cropper: ^3.0.2
+
+  # Make it easy to test
+  file: ^6.1.4
+
+  # tools
+  uuid: ^3.0.7
+  wakelock: ^0.6.2
+  path_provider: ^2.0.14
+  url_launcher: ^6.1.10
+  flutter_native_splash: ^2.2.19
+  package_info_plus: ^3.1.0
+  cached_network_image: ^3.2.3
+  flutter_svg: ^2.0.5
+  spotlight_ant: ^0.5.0
+  info_popup: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # code style
+  flutter_lints: ^2.0.1
+  firebase_database:
+  # mock object
+  build_runner: ^2.3.3
+  mockito: ^5.4.0
+  sqflite_common_ffi: ^2.2.3
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
+
+  # Enable generation of localized Strings from arb files.
+  generate: true
+
+  assets:
+    - assets/food_placeholder.png
+    - assets/google_sheet_icon.png
+    - assets/feature_request_please.gif
+    - assets/google_signin_button.svg
+
+# flutter pub run flutter_native_splash:create
+flutter_native_splash:
+  color: "#5c98ff"
+  fullscreen: true
+  image: assets/logo.png

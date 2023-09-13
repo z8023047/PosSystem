@@ -1,0 +1,116 @@
+name: Add Artifacts for Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Draft a release in specific tag, e.g. v1.0.0"
+        required: false
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+" # Release candidate only
+
+jobs:
+  check-version:
+    name: Check pubspec.yaml version with tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.result }}
+      build_code: ${{ steps.pubspec_version.outputs.code }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Load pubspec version
+        id: pubspec
+        uses: CumulusDS/get-yaml-paths-action@v0.1.0
+        with:
+          file: pubspec.yaml
+          version: version
+
+      - name: Extract pubspec version and code
+        id: pubspec_version
+        run: |
+          PUBSPEC_VERSION=$(echo "${{ steps.pubspec.outputs.version }}" | cut -f1 -d"+")
+          PUBSPEC_BUILD_CODE=$(echo "${{ steps.pubspec.outputs.version }}" | cut -f2- -d"+")
+          echo "::set-output name=version::$PUBSPEC_VERSION"
+          echo "::set-output name=code::$PUBSPEC_BUILD_CODE"
+
+      - name: Get tag that trigger this workflow
+        id: tag
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            return context.eventName === 'workflow_dispatch'
+              ? '${{ github.event.inputs.tag }}'
+              : context.payload.ref.replace(/\/?refs\/tags\//, '');
+
+      - name: Check version
+        run: test '${{ steps.tag.outputs.result }}' = 'v${{ steps.pubspec_version.outputs.version }}'
+
+  # If pushing released tag (vX.X.X), it should be fired.
+  # Should build some artifacts, see below.
+  get-release:
+    name: Get release
+    runs-on: ubuntu-latest
+    needs: check-version
+    outputs:
+      changelog: ${{ steps.get_release.outputs.changelog }}
+    steps:
+      # escape special characters
+      # https://github.com/actions/toolkit/issues/403
+      - name: Get Changelog from rc1
+        id: get_release
+        run: |
+          release=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H 'Accept: application/vnd.github.v3+json' \
+            https://api.github.com/repos/evan361425/flutter-pos-system/releases \
+            | jq -c '.[] | select( .name | contains("${{ needs.check-version.outputs.tag }}"))')
+          [ -z "$release" ] && exit 1
+
+          if [ ! "$(echo "$release" | jq -r '.tag_name')" = "${{ needs.check-version.outputs.tag }}" ]; then
+            curl -X PATCH \
+              -H 'Accept: application/vnd.github.v3+json' \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d '{"tag_name":"${{ needs.check-version.outputs.tag }}"}' \
+              "https://api.github.com/repos/evan361425/flutter-pos-system/releases/$(echo "$release" | jq -r '.id')"
+          fi
+
+          body="$(echo "$release" | jq -r '.body')"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          body="${body//$'## '/}"
+          body="${body//$'-'/•}"
+          echo "::set-output name=changelog::$body"
+
+  # Push changelog to repository
+  add-changelog:
+    name: Add changelog to Fastlane
+    runs-on: ubuntu-latest
+    needs:
+      - get-release
+      - check-version
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: "master"
+
+      - name: Push to GitHub
+        run: |
+          file="android/fastlane/metadata/android/zh-TW/changelogs/${{ needs.check-version.outputs.build_code }}.txt"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          echo "${{ needs.get-release.outputs.changelog }}" > "$file"
+          git add --all
+          git commit . -m "release(${{ needs.check-version.outputs.tag }}): ${{ needs.check-version.outputs.build_code }}"
+          git push
+
+      - name: Push tag if fired by dispatch
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          git tag ${{ github.event.inputs.tag }}
+          git push origin --tags

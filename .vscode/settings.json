@@ -1,0 +1,40 @@
+{
+  "cSpell.words": [
+    "Appbar",
+    "autofocus",
+    "avator",
+    "crashlytics",
+    "firestore",
+    "Formattable",
+    "googleapis",
+    "Linkify",
+    "loadmore",
+    "LTRB",
+    "mockito",
+    "possystem",
+    "pubspec",
+    "reorderable",
+    "sembast",
+    "signin",
+    "sqflite",
+    "sublist",
+    "upgrader",
+    "vsync",
+    "wakelock",
+    "xfile"
+  ],
+  "files.associations": {
+    "*.arb": "json"
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["/lib/l10n/*.arb"],
+      "url": "/.vscode/arb.schema.json"
+    }
+  ],
+  "json.format.enable": false,
+  "json.maxItemsComputed": 100,
+  "[json]": {
+    "editor.formatOnSave": false
+  }
+}

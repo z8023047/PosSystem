@@ -1,0 +1,157 @@
+name: Deploy to Play Store
+
+on:
+  workflow_dispatch:
+    # Enable manual run
+    inputs:
+      lane:
+        description: "Fastlane lane to use (internal, beta, promote_to_production)"
+        required: true
+        default: "internal"
+  workflow_run:
+    workflows:
+      - Add Artifacts for Release
+      - Add Artifacts for Release Candidate
+    types: [completed]
+  release:
+    # published: both pre-release and release will trigger
+    # released: only public release published
+    # prereleased: only pre release published
+    types: [released]
+
+jobs:
+  # Extract some useful variable
+  # 1. lane - Same as 'workflow_dispatch' inputs, auto generate from tag name
+  # 2. dev_build_number - extract number of RC
+  # 3. flavor - 'dev'(internal) or 'prod'(beta)
+  # 4. build_code - pubspec.yaml build code.
+  var:
+    name: Extracting variables
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      tag: ${{ steps.tag.outputs.value }}
+      lane: ${{ steps.lane.outputs.result }}
+      dev_build_number: ${{ steps.dev_build_number.outputs.result }}
+      flavor: ${{ steps.flavor.outputs.value }}
+      build_code: ${{ steps.build_code.outputs.value }}
+    steps:
+      - name: Get latest tag
+        id: tag
+        run: |
+          tag=$(curl -s "https://api.github.com/repos/evan361425/flutter-pos-system/tags" | jq -r '.[0].name')
+          echo "::set-output name=value::$tag"
+
+      - name: Extract lane
+        id: lane
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            return context.eventName === 'workflow_dispatch'
+              ? '${{ github.event.inputs.lane }}'
+              : context.eventName === 'release'
+                ? 'promote_to_production'
+                : '${{ steps.tag.outputs.value }}'.includes('-rc')
+                  ? 'internal'
+                  : 'beta';
+
+      - name: Extract Flavor
+        id: flavor
+        uses: haya14busa/action-cond@v1
+        with:
+          cond: ${{ steps.lane.outputs.result == 'internal' }}
+          if_true: dev
+          if_false: prod
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Load pubspec version
+        id: pubspec
+        uses: CumulusDS/get-yaml-paths-action@v0.1.0
+        with:
+          file: pubspec.yaml
+          version: version
+
+      - name: Extract build code
+        id: build_code
+        run: |
+          BUILD_CODE=$(echo "${{ steps.pubspec.outputs.version }}" | cut -f2- -d"+")
+          echo "::set-output name=value::$BUILD_CODE"
+
+      - name: Extract build number
+        id: dev_build_number
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            const ref = '${{ steps.tag.outputs.value }}';
+            return ref.includes('-rc')
+              ? ref.substr(ref.indexOf('-rc') + 3)
+              : ''.concat(${{ steps.build_code.outputs.value }} % 100);
+
+  fastlane-deploy:
+    runs-on: ubuntu-20.04
+    needs: var
+    steps:
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.7.x"
+          cache: true
+          channel: "stable"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.var.outputs.tag }}
+
+      # Setup Ruby, Bundler, and Gemfile dependencies
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.6"
+          bundler-cache: true
+          working-directory: android
+
+      # Get flutter dependencies.
+      - name: Build dependencies
+        run: flutter pub get
+
+      # Setup Java environment in order to build the Android app.
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "12.x"
+
+      - name: Configure Google Services
+        run: echo "$GOOGLE_SERVICES_JSON" > google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: |
+            ${{ secrets.GOOGLE_SERVICES_JSON }}
+        working-directory: android/app
+
+      - name: Configure Keystore
+        run: |
+          echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+          echo "storeFile=upload-keystore.jks" >> key.properties
+          echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
+          echo "storePassword=$KEYSTORE_STORE_PASSWORD" >> key.properties
+          echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
+        env:
+          PLAY_STORE_UPLOAD_KEY: ${{ secrets.PLAY_STORE_UPLOAD_KEY }}
+          KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+        working-directory: android
+
+      # Build and deploy with Fastlane (by default, to internal track) 🚀.
+      # Naturally, promote_to_production only deploys.
+      - name: Fastlane building
+        run: bundle exec fastlane ${{ needs.var.outputs.lane }}
+        env:
+          PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+          BUILD_NUMBER: ${{ needs.var.outputs.dev_build_number }}
+          VERSION_CODE: ${{ needs.var.outputs.build_code }}
+        working-directory: android
