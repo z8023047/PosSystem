@@ -5,7 +5,7 @@ import 'package:possystem/models/stock/ingredient.dart';
 import 'package:possystem/services/storage.dart';
 
 import '../repository.dart';
-
+//庫存的物件庫
 class Stock extends ChangeNotifier
     with
         Repository<Ingredient>,

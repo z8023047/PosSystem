@@ -16,7 +16,7 @@ class CalendarWrapper extends StatefulWidget {
 
   final void Function(DateTime month) handleDaySelected;
 
-  final bool isPortrait;
+  //final bool isPortrait;
 
   /// default: DateTime.now()
   final DateTime? initialDate;
@@ -25,7 +25,7 @@ class CalendarWrapper extends StatefulWidget {
     Key? key,
     required this.searchCountInMonth,
     required this.handleDaySelected,
-    required this.isPortrait,
+    //required this.isPortrait,
     this.initialDate,
   }) : super(key: key);
 
@@ -58,7 +58,7 @@ class _CalendarWrapperState extends State<CalendarWrapper> {
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
       //shouldFillViewport:false,
-      shouldFillViewport: widget.isPortrait ? false : true,
+      //shouldFillViewport: widget.isPortrait ? false : true,
       startingDayOfWeek: StartingDayOfWeek.monday,
       rangeSelectionMode: RangeSelectionMode.disabled,
       locale: SettingsProvider.instance

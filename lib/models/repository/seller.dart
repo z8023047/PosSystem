@@ -5,7 +5,7 @@ import 'package:possystem/models/objects/order_object.dart';
 import 'package:possystem/models/repository/cashier.dart';
 import 'package:possystem/models/repository/stock.dart';
 import 'package:possystem/services/database.dart';
-
+//點單的物件庫，賣家，用來處理把訂單丟進 DB
 class Seller extends ChangeNotifier {
   static const stashTable = 'order_stash';
 

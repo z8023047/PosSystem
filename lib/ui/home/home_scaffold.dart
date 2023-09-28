@@ -7,10 +7,12 @@ import 'package:possystem/translator.dart';
 import 'package:possystem/ui/analysis/analysis_screen.dart';
 import 'package:possystem/ui/cashier/cashier_screen.dart';
 import 'package:possystem/ui/home/home_setup_screen.dart';
+import '../order/cashier/order_details_screen.dart';
 import '../order/order_screen.dart';
 import '../order/widgets/order_by_sliding_panel.dart';
 import '../stock/stock_screen.dart';
 import 'package:possystem/models/repository/cashier.dart';
+import '../order/cashier/order_cashier_check.dart';
 class HomeScaffold extends StatefulWidget {
   const HomeScaffold({Key? key}) : super(key: key);
 
@@ -67,9 +69,13 @@ class _HomeScaffoldState extends State<HomeScaffold>
             _CustomTab(
                 key: const Key('home.order'),
                 text: S.orderCartSnapshotTutorialTitle),
+            
             //_CustomTab(key: const Key('home.stock'), text: S.homeTabStock),
             //_CustomTab(key: const Key('home.cashier'), text: S.homeTabCashier),
             _CustomTab(key: const Key('home.setting'), text: S.homeTabSetting),
+            _CustomTab(
+                key: const Key('home.orderCheck'),
+                text: S.orderCartSnapshotTutorialTitle),
           ],
         ),
       ),
@@ -82,6 +88,7 @@ class _HomeScaffoldState extends State<HomeScaffold>
           OrderScreen(
             tab: TutorialInTab(controller: _tabController, index: 1),
           ),
+          
           // StockScreen(
           //   tab: TutorialInTab(controller: _tabController, index: 1),
           // ),
@@ -90,6 +97,9 @@ class _HomeScaffoldState extends State<HomeScaffold>
           // ),
           HomeSetupScreen(
             tab: TutorialInTab(controller: _tabController, index: 2),
+          ),
+          OrderCheck(
+            tab: TutorialInTab(controller: _tabController, index: 3),
           ),
         ],
       ),
@@ -100,8 +110,8 @@ class _HomeScaffoldState extends State<HomeScaffold>
   void initState() {
     super.initState();
     _tabController = TabController(
-      initialIndex: Menu.instance.isEmpty ? 3 : 0,
-      length: 3,
+      initialIndex: Menu.instance.isEmpty ? 4 : 0,
+      length: 4,
       vsync: this,
     );
   }

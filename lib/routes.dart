@@ -38,7 +38,7 @@ import 'ui/setting/setting_screen.dart';
 import 'ui/stock/replenishment/replenishment_modal.dart';
 import 'ui/stock/replenishment/replenishment_screen.dart';
 import 'ui/stock/widgets/ingredient_modal.dart';
-
+import 'ui/order/cashier/order_cashier_check.dart';
 class Routes {
   static const String orderAttr = 'order_attr';
   static const String exporter = 'exporter';
@@ -70,7 +70,7 @@ class Routes {
   static const String stockReplenishment = 'stock/replenishment';
   static const String stockReplenishmentModal = 'stock/replenishment/modal';
   static const String stockIngredient = 'stock/ingredient';
-
+  static const String analysis = 'cashier/check';
   static final routes = <String, WidgetBuilder>{
     orderAttr: (_) => const OrderAttributeScreen(),
     featureRequest: (_) => const HomeSetupFeatureRequestScreen(),
@@ -138,8 +138,9 @@ class Routes {
             )
           : ProductQuantityModal(ingredient: arg as ProductIngredient);
     },
+    analysis:(_) => OrderCheck(),
     // order
-    orderDetails: (_) => const OrderDetailsScreen(),
+    //orderDetails: (_) => const OrderDetailsScreen(),
     // quantities
     quantities: (_) => const QuantityScreen(),
     quantityModal: (ctx) => QuantityModal(_a<Quantity?>(ctx)),

@@ -5,7 +5,7 @@ import 'package:possystem/helpers/logger.dart';
 import 'package:possystem/models/objects/cashier_object.dart';
 import 'package:possystem/services/storage.dart';
 import 'package:possystem/settings/currency_setting.dart';
-
+//收銀機的物件庫
 class Cashier extends ChangeNotifier {
   static const _favoriteKey = 'favorites';
 

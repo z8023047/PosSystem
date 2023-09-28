@@ -15,7 +15,7 @@ import 'cashier.dart';
 import 'seller.dart';
 import 'stock.dart';
 import 'package:group_button/group_button.dart';
-
+//訂單的物件庫，購物車
 class Cart extends ChangeNotifier {
   static Cart instance = Cart();
 

@@ -33,11 +33,12 @@ class AnalysisScreen extends StatelessWidget {
       message: '上下滑動可以調整週期單位，如月或週。\n左右滑動可以調整日期起訖。',
       tab: tab,
       spotlightBuilder: const SpotlightRectBuilder(),
-      child: CalendarWrapper(
+      child: CalendarWrapper (
         isPortrait: isPortrait,
         handleDaySelected: _handleDaySelected,
         searchCountInMonth: _searchCountInMonth,
-      ),
+        
+      ) ,
     );
   }
 

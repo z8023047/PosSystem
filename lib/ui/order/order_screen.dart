@@ -132,15 +132,16 @@ class OrderScreenState extends State<OrderScreen> {
   }
 
   void _onApply() async {
-    //pushnamed:用來將帶名字的Router壓入stack
-    //Routes.orderDetails
-    //final result = await Navigator.of(context).pushNamed(Routes.orderDetails);
+    //pushnamed:用來將帶名字的Router壓入stac
+    //跳轉到OrderDetailsScreen
+    Cart.instance.checkout();
+    await Navigator.of(context).pushNamed(Routes.analysis);
     // if (result is CashierUpdateStatus) {
     //   //_showCashierWarning(result);
     //   slidingPanel.currentState?.reset();
     // }
-    Cart.instance.checkout();
-
+    //Cart.instance.checkout();
+    
     // if (context.mounted) {
     //   final confirmed = await _confirmChangeHistory(context);
     //   if (confirmed) {
